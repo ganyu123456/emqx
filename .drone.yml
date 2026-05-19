@@ -1,0 +1,164 @@
+---
+# Pipeline 1：构建并推送 amd64 镜像
+kind: pipeline
+name: emqx-amd64
+type: docker
+
+platform:
+  os: linux
+  arch: amd64
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - tag
+
+steps:
+  - name: push-amd64
+    image: plugins/docker
+    settings:
+      registry: harbor.zkjgy.online
+      repo: harbor.zkjgy.online/library/emqx
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+      tags:
+        - linux-amd64
+        - 5.8.8-amd64
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+
+---
+# Pipeline 2：构建并推送 arm64 镜像
+kind: pipeline
+name: emqx-arm64
+type: docker
+
+platform:
+  os: linux
+  arch: arm64
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - tag
+
+steps:
+  - name: push-arm64
+    image: plugins/docker
+    settings:
+      registry: harbor.zkjgy.online
+      repo: harbor.zkjgy.online/library/emqx
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+      tags:
+        - linux-arm64
+        - 5.8.8-arm64
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+
+---
+# Pipeline 3：合并多架构 Manifest
+kind: pipeline
+name: emqx-manifest
+type: docker
+
+depends_on:
+  - emqx-amd64
+  - emqx-arm64
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - tag
+
+steps:
+  - name: manifest-versioned
+    image: plugins/manifest
+    settings:
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+      target: harbor.zkjgy.online/library/emqx:5.8.8
+      template: harbor.zkjgy.online/library/emqx:OS-ARCH
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+  - name: manifest-latest
+    image: plugins/manifest
+    settings:
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+      target: harbor.zkjgy.online/library/emqx:latest
+      template: harbor.zkjgy.online/library/emqx:OS-ARCH
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+---
+# Pipeline 4：打包并推送 Helm Chart 到 Harbor OCI
+kind: pipeline
+name: emqx-helm
+type: docker
+
+depends_on:
+  - emqx-manifest
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - tag
+
+steps:
+  - name: helm-package-push
+    image: alpine/helm:3.14.0
+    environment:
+      HARBOR_USERNAME:
+        from_secret: harbor_username
+      HARBOR_PASSWORD:
+        from_secret: harbor_password
+    commands:
+      - helm registry login harbor.zkjgy.online
+          --username $HARBOR_USERNAME
+          --password $HARBOR_PASSWORD
+      - helm repo add emqx https://repos.emqx.io/charts
+      - helm repo update
+      - helm pull emqx/emqx --version 5.8.8 --untar --untardir ./charts
+      - helm package ./charts/emqx --version 5.8.8 --app-version 5.8.8
+      - helm push emqx-5.8.8.tgz oci://harbor.zkjgy.online/charts
