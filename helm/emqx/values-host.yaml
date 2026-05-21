@@ -1,0 +1,66 @@
+# values-host.yaml
+# 单节点 + hostNetwork 部署
+# MQTT 端口从 1883 改为 11883，其余端口保持不变
+
+replicaCount: 1
+
+image:
+  repository: harbor.zkjgy.online/library/emqx
+  pullPolicy: IfNotPresent
+  tag: "5.8.8"
+
+# Pod 直接使用宿主机网络栈
+hostNetwork: true
+# hostNetwork=true 时必须设置，否则 DNS 解析异常
+dnsPolicy: ClusterFirstWithHostNet
+
+emqxConfig:
+  EMQX_CLUSTER__DISCOVERY_STRATEGY: "dns"
+  EMQX_DASHBOARD__DEFAULT_USERNAME: "admin"
+  EMQX_DASHBOARD__DEFAULT_PASSWORD: "public"
+  # MQTT TCP 端口从 1883 改为 11883
+  EMQX_LISTENERS__TCP__DEFAULT__BIND: "0.0.0.0:11883"
+
+service:
+  type: ClusterIP
+  clusterIP: ""
+  mqtt: 11883
+  mqttssl: 8883
+  ws: 8083
+  wss: 8084
+  dashboard: 18083
+  nodePorts:
+    mqtt:
+    mqttssl:
+    mgmt:
+    ws:
+    wss:
+    dashboard:
+    dashboardtls:
+  loadBalancerSourceRanges: []
+  externalIPs: []
+  externalTrafficPolicy: "Cluster"
+  annotations: {}
+  labels: {}
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+
+podSecurityContext:
+  enabled: true
+  fsGroup: 1000
+  fsGroupChangePolicy: Always
+  runAsUser: 1000
+  supplementalGroups:
+    - 1000
+
+containerSecurityContext:
+  enabled: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+pdb:
+  enabled: false

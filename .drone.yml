@@ -157,8 +157,5 @@ steps:
       - helm registry login harbor.zkjgy.online
           --username $HARBOR_USERNAME
           --password $HARBOR_PASSWORD
-      - helm repo add emqx https://repos.emqx.io/charts
-      - helm repo update
-      - helm pull emqx/emqx --version 5.8.8 --untar --untardir ./charts
-      - helm package ./charts/emqx --version 5.8.8 --app-version 5.8.8
+      - helm package helm/emqx --version 5.8.8 --app-version 5.8.8
       - helm push emqx-5.8.8.tgz oci://harbor.zkjgy.online/charts
