@@ -1,0 +1,321 @@
+[
+  {
+    "groupKey": "replicas",
+    "label": "副本与镜像",
+    "icon": "🐳",
+    "description": "EMQX 集群副本数及容器镜像配置",
+    "fields": [
+      {
+        "key": "replicaCount",
+        "label": "集群节点数",
+        "type": "number",
+        "defaultValue": 3,
+        "yamlPath": "replicaCount",
+        "min": 1,
+        "max": 10,
+        "description": "建议奇数节点，避免集群脑裂无法自动恢复",
+        "span": 12
+      },
+      {
+        "key": "imageRepository",
+        "label": "镜像仓库",
+        "type": "string",
+        "defaultValue": "emqx/emqx",
+        "yamlPath": "image.repository",
+        "span": 24
+      },
+      {
+        "key": "imageTag",
+        "label": "镜像版本",
+        "type": "string",
+        "defaultValue": "",
+        "yamlPath": "image.tag",
+        "placeholder": "留空则使用 Chart.appVersion，如 5.3.0",
+        "description": "指定镜像 Tag，留空使用默认版本",
+        "span": 12
+      },
+      {
+        "key": "imagePullPolicy",
+        "label": "镜像拉取策略",
+        "type": "select",
+        "defaultValue": "IfNotPresent",
+        "yamlPath": "image.pullPolicy",
+        "options": [
+          { "label": "IfNotPresent", "value": "IfNotPresent" },
+          { "label": "Always", "value": "Always" },
+          { "label": "Never", "value": "Never" }
+        ],
+        "span": 12
+      }
+    ]
+  },
+  {
+    "groupKey": "emqxCore",
+    "label": "EMQX 核心配置",
+    "icon": "⚙️",
+    "description": "集群发现策略、Dashboard 账号及持久化",
+    "fields": [
+      {
+        "key": "clusterStrategy",
+        "label": "集群发现策略",
+        "type": "select",
+        "defaultValue": "dns",
+        "yamlPath": "emqxConfig.EMQX_CLUSTER__DISCOVERY_STRATEGY",
+        "options": [
+          { "label": "dns - DNS 自动发现（推荐）", "value": "dns" },
+          { "label": "k8s - Kubernetes API", "value": "k8s" },
+          { "label": "manual - 手动指定节点", "value": "manual" },
+          { "label": "static - 静态节点列表", "value": "static" }
+        ],
+        "span": 12
+      },
+      {
+        "key": "dashboardUser",
+        "label": "Dashboard 用户名",
+        "type": "string",
+        "defaultValue": "admin",
+        "yamlPath": "emqxConfig.EMQX_DASHBOARD__DEFAULT_USERNAME",
+        "span": 12
+      },
+      {
+        "key": "dashboardPassword",
+        "label": "Dashboard 密码",
+        "type": "password",
+        "defaultValue": "public",
+        "yamlPath": "emqxConfig.EMQX_DASHBOARD__DEFAULT_PASSWORD",
+        "description": "生产环境请务必修改默认密码",
+        "span": 12
+      },
+      {
+        "key": "podManagementPolicy",
+        "label": "Pod 部署策略",
+        "type": "select",
+        "defaultValue": "Parallel",
+        "yamlPath": "podManagementPolicy",
+        "options": [
+          { "label": "Parallel - 并行启动（推荐）", "value": "Parallel" },
+          { "label": "OrderedReady - 按序启动", "value": "OrderedReady" }
+        ],
+        "span": 12
+      },
+      {
+        "key": "persistenceEnabled",
+        "label": "持久化存储",
+        "type": "boolean",
+        "defaultValue": false,
+        "yamlPath": "persistence.enabled",
+        "description": "开启后 EMQX 数据持久化到 PVC，重启不丢失",
+        "span": 12
+      },
+      {
+        "key": "persistenceSize",
+        "label": "存储大小",
+        "type": "string",
+        "defaultValue": "20Mi",
+        "yamlPath": "persistence.size",
+        "description": "仅在持久化开启时生效",
+        "span": 12
+      }
+    ]
+  },
+  {
+    "groupKey": "service",
+    "label": "服务端口",
+    "icon": "🌐",
+    "description": "EMQX 对外暴露的服务类型与端口配置",
+    "fields": [
+      {
+        "key": "serviceType",
+        "label": "Service 类型",
+        "type": "select",
+        "defaultValue": "ClusterIP",
+        "yamlPath": "service.type",
+        "options": [
+          { "label": "ClusterIP - 集群内访问", "value": "ClusterIP" },
+          { "label": "NodePort - 节点端口", "value": "NodePort" },
+          { "label": "LoadBalancer - 负载均衡", "value": "LoadBalancer" }
+        ],
+        "span": 12
+      },
+      {
+        "key": "mqttPort",
+        "label": "MQTT 端口",
+        "type": "number",
+        "defaultValue": 1883,
+        "yamlPath": "service.mqtt",
+        "min": 1,
+        "max": 65535,
+        "span": 12
+      },
+      {
+        "key": "mqttsslPort",
+        "label": "MQTT SSL 端口",
+        "type": "number",
+        "defaultValue": 8883,
+        "yamlPath": "service.mqttssl",
+        "min": 1,
+        "max": 65535,
+        "span": 12
+      },
+      {
+        "key": "wsPort",
+        "label": "WebSocket 端口",
+        "type": "number",
+        "defaultValue": 8083,
+        "yamlPath": "service.ws",
+        "min": 1,
+        "max": 65535,
+        "span": 12
+      },
+      {
+        "key": "wssPort",
+        "label": "WSS 端口",
+        "type": "number",
+        "defaultValue": 8084,
+        "yamlPath": "service.wss",
+        "min": 1,
+        "max": 65535,
+        "span": 12
+      },
+      {
+        "key": "dashboardPort",
+        "label": "Dashboard 端口",
+        "type": "number",
+        "defaultValue": 18083,
+        "yamlPath": "service.dashboard",
+        "min": 1,
+        "max": 65535,
+        "span": 12
+      }
+    ]
+  },
+  {
+    "groupKey": "resources",
+    "label": "资源限制",
+    "icon": "💾",
+    "description": "容器的资源申请与上限（默认不设限制）",
+    "fields": [
+      {
+        "key": "requestsCpu",
+        "label": "CPU 申请值",
+        "type": "string",
+        "defaultValue": "",
+        "yamlPath": "resources.requests.cpu",
+        "placeholder": "如 500m，留空不设限制",
+        "span": 12
+      },
+      {
+        "key": "requestsMemory",
+        "label": "内存申请值",
+        "type": "string",
+        "defaultValue": "",
+        "yamlPath": "resources.requests.memory",
+        "placeholder": "如 512Mi，留空不设限制",
+        "span": 12
+      },
+      {
+        "key": "limitsCpu",
+        "label": "CPU 上限",
+        "type": "string",
+        "defaultValue": "",
+        "yamlPath": "resources.limits.cpu",
+        "placeholder": "如 1000m，留空不设限制",
+        "span": 12
+      },
+      {
+        "key": "limitsMemory",
+        "label": "内存上限",
+        "type": "string",
+        "defaultValue": "",
+        "yamlPath": "resources.limits.memory",
+        "placeholder": "如 512Mi，留空不设限制",
+        "span": 12
+      }
+    ]
+  },
+  {
+    "groupKey": "security",
+    "label": "安全上下文",
+    "icon": "🔒",
+    "description": "Pod 与容器级别的安全策略",
+    "fields": [
+      {
+        "key": "podSecurityEnabled",
+        "label": "Pod 安全上下文",
+        "type": "boolean",
+        "defaultValue": true,
+        "yamlPath": "podSecurityContext.enabled",
+        "span": 12
+      },
+      {
+        "key": "containerSecurityEnabled",
+        "label": "容器安全上下文",
+        "type": "boolean",
+        "defaultValue": true,
+        "yamlPath": "containerSecurityContext.enabled",
+        "span": 12
+      },
+      {
+        "key": "runAsUser",
+        "label": "运行用户 UID",
+        "type": "number",
+        "defaultValue": 1000,
+        "yamlPath": "podSecurityContext.runAsUser",
+        "min": 0,
+        "max": 65535,
+        "span": 12
+      },
+      {
+        "key": "fsGroup",
+        "label": "文件系统组 ID",
+        "type": "number",
+        "defaultValue": 1000,
+        "yamlPath": "podSecurityContext.fsGroup",
+        "min": 0,
+        "max": 65535,
+        "span": 12
+      }
+    ]
+  },
+  {
+    "groupKey": "advanced",
+    "label": "高级选项",
+    "icon": "🔧",
+    "description": "监控、SSL 及 Ingress 开关",
+    "fields": [
+      {
+        "key": "metricsEnabled",
+        "label": "Prometheus 监控",
+        "type": "boolean",
+        "defaultValue": false,
+        "yamlPath": "metrics.enabled",
+        "span": 12
+      },
+      {
+        "key": "sslEnabled",
+        "label": "SSL/TLS",
+        "type": "boolean",
+        "defaultValue": false,
+        "yamlPath": "ssl.enabled",
+        "span": 12
+      },
+      {
+        "key": "pdbEnabled",
+        "label": "Pod 中断预算",
+        "type": "boolean",
+        "defaultValue": false,
+        "yamlPath": "pdb.enabled",
+        "description": "开启后限制自愿中断的最大 Pod 数",
+        "span": 12
+      },
+      {
+        "key": "ingressDashboard",
+        "label": "Dashboard Ingress",
+        "type": "boolean",
+        "defaultValue": false,
+        "yamlPath": "ingress.dashboard.enabled",
+        "span": 12
+      }
+    ]
+  }
+]
