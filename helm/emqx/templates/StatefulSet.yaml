@@ -137,6 +137,9 @@ spec:
                 fieldPath: metadata.name
           - name: EMQX_HOST
             value: $(POD_NAME).{{ include "emqx.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local
+          {{- with .Values.env }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ include "emqx.fullname" . }}-env
