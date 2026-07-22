@@ -10,8 +10,7 @@ emqx/
 ├── .drone.yml              # Drone CI 流水线
 └── helm/emqx/
     ├── Chart.yaml          # Chart 元信息
-    ├── values.yaml         # 默认配置（3 节点集群模式）
-    ├── values-host.yaml    # 单节点 hostNetwork 模式配置
+    └── values.yaml         # 单节点 hostNetwork 模式配置
     └── templates/
         └── StatefulSet.yaml  # 已支持 hostNetwork / dnsPolicy
 ```
@@ -90,8 +89,7 @@ helm install emqx \
   oci://harbor.zkjgy.online/charts/emqx \
   --version 5.8.8 \
   --namespace emqx \
-  --create-namespace \
-  -f values-host.yaml
+  --create-namespace
 ```
 
 | 配置项 | 值 |

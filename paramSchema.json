@@ -9,7 +9,7 @@
         "key": "replicaCount",
         "label": "集群节点数",
         "type": "number",
-        "defaultValue": 3,
+        "defaultValue": 1,
         "yamlPath": "replicaCount",
         "min": 1,
         "max": 10,
@@ -20,7 +20,7 @@
         "key": "imageRepository",
         "label": "镜像仓库",
         "type": "string",
-        "defaultValue": "emqx/emqx",
+        "defaultValue": "10.253.3.91:30550/library/emqx",
         "yamlPath": "image.repository",
         "span": 24
       },
@@ -28,10 +28,9 @@
         "key": "imageTag",
         "label": "镜像版本",
         "type": "string",
-        "defaultValue": "",
+        "defaultValue": "5.8.8",
         "yamlPath": "image.tag",
-        "placeholder": "留空则使用 Chart.appVersion，如 5.3.0",
-        "description": "指定镜像 Tag，留空使用默认版本",
+        "description": "指定镜像 Tag",
         "span": 12
       },
       {
@@ -102,7 +101,7 @@
         "key": "persistenceEnabled",
         "label": "持久化存储",
         "type": "boolean",
-        "defaultValue": false,
+        "defaultValue": true,
         "yamlPath": "persistence.enabled",
         "description": "开启后 EMQX 数据持久化到 PVC，重启不丢失",
         "span": 12
@@ -111,7 +110,7 @@
         "key": "persistenceSize",
         "label": "存储大小",
         "type": "string",
-        "defaultValue": "20Mi",
+        "defaultValue": "1Gi",
         "yamlPath": "persistence.size",
         "description": "仅在持久化开启时生效",
         "span": 12
@@ -141,7 +140,7 @@
         "key": "mqttPort",
         "label": "MQTT 端口",
         "type": "number",
-        "defaultValue": 1883,
+        "defaultValue": 11883,
         "yamlPath": "service.mqtt",
         "min": 1,
         "max": 65535,
@@ -287,8 +286,16 @@
         "key": "metricsEnabled",
         "label": "Prometheus 监控",
         "type": "boolean",
-        "defaultValue": false,
+        "defaultValue": true,
         "yamlPath": "metrics.enabled",
+        "span": 12
+      },
+      {
+        "key": "metricsInterval",
+        "label": "采集间隔",
+        "type": "string",
+        "defaultValue": "15s",
+        "yamlPath": "metrics.interval",
         "span": 12
       },
       {
