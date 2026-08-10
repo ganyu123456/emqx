@@ -71,5 +71,10 @@ metrics:
       regex: ".+"
       action: drop
 
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
 pdb:
   enabled: false
