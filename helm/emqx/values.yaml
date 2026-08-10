@@ -98,6 +98,8 @@ containerSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
+resources: {}
+
 metrics:
   enabled: true
   type: prometheus
