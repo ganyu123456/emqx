@@ -148,27 +148,13 @@ spec:
                 name: {{ .Values.envFromSecret }}
           {{- end }}
           {{- $r := .Values.resources }}
-          {{- if or (and $r.limits (or $r.limits.cpu $r.limits.memory)) (and $r.requests (or $r.requests.cpu $r.requests.memory)) }}
           resources:
-            {{- if and $r.limits (or $r.limits.cpu $r.limits.memory) }}
             limits:
-              {{- with $r.limits.cpu }}
-              cpu: {{ . }}
-              {{- end }}
-              {{- with $r.limits.memory }}
-              memory: {{ . }}
-              {{- end }}
-            {{- end }}
-            {{- if and $r.requests (or $r.requests.cpu $r.requests.memory) }}
+              cpu: {{ $r.limits.cpu | default "2000m" }}
+              memory: {{ $r.limits.memory | default "2Gi" }}
             requests:
-              {{- with $r.requests.cpu }}
-              cpu: {{ . }}
-              {{- end }}
-              {{- with $r.requests.memory }}
-              memory: {{ . }}
-              {{- end }}
-            {{- end }}
-          {{- end }}
+              cpu: {{ $r.requests.cpu | default "500m" }}
+              memory: {{ $r.requests.memory | default "512Mi" }}
           volumeMounts:
           - name: emqx-data
             mountPath: "/opt/emqx/data"
