@@ -192,42 +192,42 @@
     "groupKey": "resources",
     "label": "资源限制",
     "icon": "💾",
-    "description": "容器的资源申请与上限（默认不设限制）",
+    "description": "容器的资源申请与上限",
     "fields": [
       {
         "key": "requestsCpu",
         "label": "CPU 申请值",
         "type": "string",
-        "defaultValue": "",
+        "defaultValue": "500m",
         "yamlPath": "resources.requests.cpu",
-        "placeholder": "如 500m，留空不设限制",
+        "placeholder": "如 500m",
         "span": 12
       },
       {
         "key": "requestsMemory",
         "label": "内存申请值",
         "type": "string",
-        "defaultValue": "",
+        "defaultValue": "512Mi",
         "yamlPath": "resources.requests.memory",
-        "placeholder": "如 512Mi，留空不设限制",
+        "placeholder": "如 512Mi",
         "span": 12
       },
       {
         "key": "limitsCpu",
         "label": "CPU 上限",
         "type": "string",
-        "defaultValue": "",
+        "defaultValue": "2000m",
         "yamlPath": "resources.limits.cpu",
-        "placeholder": "如 1000m，留空不设限制",
+        "placeholder": "如 2000m",
         "span": 12
       },
       {
         "key": "limitsMemory",
         "label": "内存上限",
         "type": "string",
-        "defaultValue": "",
+        "defaultValue": "2Gi",
         "yamlPath": "resources.limits.memory",
-        "placeholder": "如 512Mi，留空不设限制",
+        "placeholder": "如 2Gi",
         "span": 12
       }
     ]
