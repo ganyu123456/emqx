@@ -98,7 +98,13 @@ containerSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-resources: {}
+resources:
+  limits:
+    cpu: "2"
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
 
 metrics:
   enabled: true
