@@ -31,15 +31,15 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            harbor.zkjgy.online/library/emqx:5.8.8-amd64
+            harbor.zkjgy.online/library/emqx:5.8.10-amd64
 
       - name: Save amd64 image as tar.gz
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker pull harbor.zkjgy.online/library/emqx:5.8.8-amd64
-          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故统一为 5.8.8 再保存
-          docker tag harbor.zkjgy.online/library/emqx:5.8.8-amd64 harbor.zkjgy.online/library/emqx:5.8.8
-          docker save harbor.zkjgy.online/library/emqx:5.8.8 \
+          docker pull harbor.zkjgy.online/library/emqx:5.8.10-amd64
+          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故统一为 5.8.10 再保存
+          docker tag harbor.zkjgy.online/library/emqx:5.8.10-amd64 harbor.zkjgy.online/library/emqx:5.8.10
+          docker save harbor.zkjgy.online/library/emqx:5.8.10 \
             | gzip > emqx-amd64.tar.gz
 
       - name: Upload amd64 artifact
@@ -74,15 +74,15 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            harbor.zkjgy.online/library/emqx:5.8.8-arm64
+            harbor.zkjgy.online/library/emqx:5.8.10-arm64
 
       - name: Save arm64 image as tar.gz
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker pull --platform linux/arm64 harbor.zkjgy.online/library/emqx:5.8.8-arm64
-          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故统一为 5.8.8 再保存
-          docker tag harbor.zkjgy.online/library/emqx:5.8.8-arm64 harbor.zkjgy.online/library/emqx:5.8.8
-          docker save harbor.zkjgy.online/library/emqx:5.8.8 \
+          docker pull --platform linux/arm64 harbor.zkjgy.online/library/emqx:5.8.10-arm64
+          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故统一为 5.8.10 再保存
+          docker tag harbor.zkjgy.online/library/emqx:5.8.10-arm64 harbor.zkjgy.online/library/emqx:5.8.10
+          docker save harbor.zkjgy.online/library/emqx:5.8.10 \
             | gzip > emqx-arm64.tar.gz
 
       - name: Upload arm64 artifact
@@ -112,9 +112,9 @@ jobs:
       - name: Create and Push Versioned Manifest
         run: |
           docker buildx imagetools create \
-            --tag harbor.zkjgy.online/library/emqx:5.8.8 \
-            harbor.zkjgy.online/library/emqx:5.8.8-amd64 \
-            harbor.zkjgy.online/library/emqx:5.8.8-arm64
+            --tag harbor.zkjgy.online/library/emqx:5.8.10 \
+            harbor.zkjgy.online/library/emqx:5.8.10-amd64 \
+            harbor.zkjgy.online/library/emqx:5.8.10-arm64
 
   helm-package-push:
     name: Helm Package and Push
@@ -138,15 +138,15 @@ jobs:
           helm registry login harbor.zkjgy.online \
             --username $HARBOR_USERNAME \
             --password $HARBOR_PASSWORD
-          helm package helm/emqx --version 5.8.8 --app-version 5.8.8
-          helm push emqx-5.8.8.tgz oci://harbor.zkjgy.online/charts
+          helm package helm/emqx --version 5.8.10 --app-version 5.8.10
+          helm push emqx-5.8.10.tgz oci://harbor.zkjgy.online/charts
 
       - name: Upload helm artifact
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: emqx-helm
-          path: emqx-5.8.8.tgz
+          path: emqx-5.8.10.tgz
 
   release:
     name: Create GitHub Release
@@ -177,11 +177,11 @@ jobs:
 
       - name: Build offline package
         run: |
-          PKG_DIR="emqx-5.8.8-offline"
+          PKG_DIR="emqx-5.8.10-offline"
           mkdir -p "$PKG_DIR"
           cp emqx-amd64.tar.gz "$PKG_DIR/"
           cp emqx-arm64.tar.gz "$PKG_DIR/"
-          cp emqx-5.8.8.tgz "$PKG_DIR/"
+          cp emqx-5.8.10.tgz "$PKG_DIR/"
           cp paramSchema.json "$PKG_DIR/"
           tar czf "${PKG_DIR}.tar.gz" "$PKG_DIR"
 
@@ -190,8 +190,8 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            emqx-5.8.8.tgz
+            emqx-5.8.10.tgz
             emqx-amd64.tar.gz
             emqx-arm64.tar.gz
             paramSchema.json
-            emqx-5.8.8-offline.tar.gz
+            emqx-5.8.10-offline.tar.gz
