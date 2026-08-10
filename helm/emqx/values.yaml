@@ -21,6 +21,42 @@ emqxConfig:
   # MQTT TCP 端口从 1883 改为 11883
   EMQX_LISTENERS__TCP__DEFAULT__BIND: "0.0.0.0:11883"
 
+ssl:
+  enabled: false
+  useExisting: false
+  existingName: ""
+  issuer:
+    name: ""
+    kind: ""
+  commonName: ""
+  dnsnames: []
+
+ingress:
+  dashboard:
+    enabled: false
+    annotations: {}
+    ingressClassName: ""
+    hosts: []
+    path: /
+    pathType: ImplementationSpecific
+    tls: []
+  mqtt:
+    enabled: false
+    annotations: {}
+    ingressClassName: ""
+    hosts: []
+    path: /
+    pathType: ImplementationSpecific
+    tls: []
+  ws:
+    enabled: false
+    annotations: {}
+    ingressClassName: ""
+    hosts: []
+    path: /mqtt
+    pathType: ImplementationSpecific
+    tls: []
+
 service:
   type: ClusterIP
   clusterIP: ""
