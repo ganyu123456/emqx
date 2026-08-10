@@ -5,193 +5,270 @@ on:
     tags:
       - 'v*'
 
+env:
+  REGISTRY: harbor.zkjgy.online
+  PROJECT: library
+  IMAGE_NAME: emqx
+
 jobs:
+  # ── 提取版本号 ─────────────────────────────────────────────
+  version:
+    name: Determine version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - id: meta
+        run: |
+          V="${GITHUB_REF#refs/tags/v}"
+          echo "version=$V" >> $GITHUB_OUTPUT
+          echo "Resolved version: $V"
+
+  # ── amd64 镜像 ─────────────────────────────────────────────
   build-amd64:
-    name: Build and Push amd64
+    name: Build amd64
+    needs: version
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Login to Harbor
         uses: docker/login-action@v3
         with:
-          registry: harbor.zkjgy.online
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push amd64
+      - name: Build and push amd64
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           platforms: linux/amd64
           push: true
-          tags: |
-            harbor.zkjgy.online/library/emqx:5.8.10-amd64
+          tags: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}-amd64
 
-      - name: Save amd64 image as tar.gz
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Save image for offline release
         run: |
-          docker pull harbor.zkjgy.online/library/emqx:5.8.10-amd64
-          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故统一为 5.8.10 再保存
-          docker tag harbor.zkjgy.online/library/emqx:5.8.10-amd64 harbor.zkjgy.online/library/emqx:5.8.10
-          docker save harbor.zkjgy.online/library/emqx:5.8.10 \
-            | gzip > emqx-amd64.tar.gz
+          docker pull --platform linux/amd64 \
+            ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}-amd64
+          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故去掉架构后缀再保存
+          docker tag ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}-amd64 \
+            ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}
+          docker save \
+            ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }} \
+            | gzip > ${{ env.IMAGE_NAME }}-amd64.tar.gz
 
       - name: Upload amd64 artifact
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
-          name: emqx-amd64
-          path: emqx-amd64.tar.gz
+          name: image-amd64
+          path: ${{ env.IMAGE_NAME }}-amd64.tar.gz
+          retention-days: 1
 
+  # ── arm64 镜像 ─────────────────────────────────────────────
   build-arm64:
-    name: Build and Push arm64
+    name: Build arm64
+    needs: version
     runs-on: ubuntu-24.04-arm
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Login to Harbor
         uses: docker/login-action@v3
         with:
-          registry: harbor.zkjgy.online
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push arm64
+      - name: Build and push arm64
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           platforms: linux/arm64
           push: true
-          tags: |
-            harbor.zkjgy.online/library/emqx:5.8.10-arm64
+          tags: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}-arm64
 
-      - name: Save arm64 image as tar.gz
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Save image for offline release
         run: |
-          docker pull --platform linux/arm64 harbor.zkjgy.online/library/emqx:5.8.10-arm64
-          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故统一为 5.8.10 再保存
-          docker tag harbor.zkjgy.online/library/emqx:5.8.10-arm64 harbor.zkjgy.online/library/emqx:5.8.10
-          docker save harbor.zkjgy.online/library/emqx:5.8.10 \
-            | gzip > emqx-arm64.tar.gz
+          docker pull --platform linux/arm64 \
+            ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}-arm64
+          # 客户平台按文件名区分架构、要求两个异构镜像内部 tag 一致，故去掉架构后缀再保存
+          docker tag ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}-arm64 \
+            ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}
+          docker save \
+            ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }} \
+            | gzip > ${{ env.IMAGE_NAME }}-arm64.tar.gz
 
       - name: Upload arm64 artifact
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
-          name: emqx-arm64
-          path: emqx-arm64.tar.gz
+          name: image-arm64
+          path: ${{ env.IMAGE_NAME }}-arm64.tar.gz
+          retention-days: 1
 
+  # ── 多架构 manifest ────────────────────────────────────────
   manifest:
-    name: Create and Push Manifest
+    name: Create manifest
     runs-on: ubuntu-latest
     needs:
+      - version
       - build-amd64
       - build-arm64
     steps:
       - name: Login to Harbor
         uses: docker/login-action@v3
         with:
-          registry: harbor.zkjgy.online
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Create and Push Versioned Manifest
+      - name: Create and push manifests
         run: |
-          docker buildx imagetools create \
-            --tag harbor.zkjgy.online/library/emqx:5.8.10 \
-            harbor.zkjgy.online/library/emqx:5.8.10-amd64 \
-            harbor.zkjgy.online/library/emqx:5.8.10-arm64
+          V="${{ needs.version.outputs.version }}"
+          BASE="${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}"
 
-  helm-package-push:
-    name: Helm Package and Push
+          # 版本 manifest
+          docker buildx imagetools create \
+            --tag "${BASE}:${V}" \
+            "${BASE}:${V}-amd64" \
+            "${BASE}:${V}-arm64"
+
+          echo "Manifest ${BASE}:${V} created"
+
+  # ── Helm 打包 & 推送 ───────────────────────────────────────
+  helm-package:
+    name: Helm package
     runs-on: ubuntu-latest
     needs:
+      - version
       - manifest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
           version: v3.14.0
 
-      - name: Helm Login and Push
+      - name: Update chart version
+        run: |
+          V="${{ needs.version.outputs.version }}"
+          CHART="helm/${IMAGE_NAME}/Chart.yaml"
+
+          sed -i "s/^version:.*/version: $V/" "$CHART"
+
+          echo "Updated Chart.yaml:"
+          cat "$CHART"
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+
+      - name: Package Helm chart
+        run: |
+          helm package helm/${{ env.IMAGE_NAME }}
+
+      - name: Push to Harbor (OCI)
         env:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          helm registry login harbor.zkjgy.online \
-            --username $HARBOR_USERNAME \
-            --password $HARBOR_PASSWORD
-          helm package helm/emqx --version 5.8.10 --app-version 5.8.10
-          helm push emqx-5.8.10.tgz oci://harbor.zkjgy.online/charts
+          V="${{ needs.version.outputs.version }}"
+          helm registry login ${{ env.REGISTRY }} \
+            --username "$HARBOR_USERNAME" \
+            --password "$HARBOR_PASSWORD"
+          helm push ${{ env.IMAGE_NAME }}-${V}.tgz oci://${{ env.REGISTRY }}/charts
 
       - name: Upload helm artifact
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
-          name: emqx-helm
-          path: emqx-5.8.10.tgz
+          name: helm-chart
+          path: ${{ env.IMAGE_NAME }}-${{ needs.version.outputs.version }}.tgz
+          retention-days: 1
 
+  # ── 离线发布包 (仅 tag) ────────────────────────────────────
   release:
-    name: Create GitHub Release
+    name: GitHub Release
     runs-on: ubuntu-latest
     needs:
-      - helm-package-push
-    if: startsWith(github.ref, 'refs/tags/')
+      - version
+      - build-amd64
+      - build-arm64
+      - helm-package
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download amd64 artifact
+      - name: Download amd64 image
         uses: actions/download-artifact@v4
         with:
-          name: emqx-amd64
+          name: image-amd64
+          path: artifacts/image-amd64
 
-      - name: Download arm64 artifact
+      - name: Download arm64 image
         uses: actions/download-artifact@v4
         with:
-          name: emqx-arm64
+          name: image-arm64
+          path: artifacts/image-arm64
 
-      - name: Download helm artifact
+      - name: Download helm chart
         uses: actions/download-artifact@v4
         with:
-          name: emqx-helm
+          name: helm-chart
+          path: artifacts/helm-chart
 
       - name: Build offline package
         run: |
-          PKG_DIR="emqx-5.8.10-offline"
+          V="${{ needs.version.outputs.version }}"
+          NAME="${{ env.IMAGE_NAME }}"
+          PKG_DIR="${NAME}-${V}-offline"
           mkdir -p "$PKG_DIR"
-          cp emqx-amd64.tar.gz "$PKG_DIR/"
-          cp emqx-arm64.tar.gz "$PKG_DIR/"
-          cp emqx-5.8.10.tgz "$PKG_DIR/"
+
+          # 镜像
+          cp artifacts/image-amd64/${NAME}-amd64.tar.gz "$PKG_DIR/"
+          cp artifacts/image-arm64/${NAME}-arm64.tar.gz "$PKG_DIR/"
+
+          # Helm
+          cp artifacts/helm-chart/${NAME}-${V}.tgz "$PKG_DIR/"
+
+          # 平台部署向导参数配置
           cp paramSchema.json "$PKG_DIR/"
-          tar czf "${PKG_DIR}.tar.gz" "$PKG_DIR"
+
+          # README
+          cat > "$PKG_DIR/README.txt" << EOF
+          EMQX — 离线部署包 v${V}
+          =================================
+
+          包含文件:
+            emqx-amd64.tar.gz   – linux/amd64 镜像
+            emqx-arm64.tar.gz   – linux/arm64 镜像
+            emqx-${V}.tgz       – Helm Chart
+            paramSchema.json    – 平台部署向导参数配置
+
+          部署步骤:
+            1. 将两个镜像 tar 导入集群 Harbor（文件名区分架构，内部 tag 统一为 ${V}）
+            2. helm install emqx ./emqx-${V}.tgz
+          EOF
+
+          tar czf "${NAME}-${V}-offline.tar.gz" "$PKG_DIR"
+          echo "Created ${NAME}-${V}-offline.tar.gz"
+          ls -lh "${NAME}-${V}-offline.tar.gz"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: v${{ needs.version.outputs.version }}
           generate_release_notes: true
           files: |
-            emqx-5.8.10.tgz
-            emqx-amd64.tar.gz
-            emqx-arm64.tar.gz
+            artifacts/helm-chart/${{ env.IMAGE_NAME }}-${{ needs.version.outputs.version }}.tgz
+            artifacts/image-amd64/${{ env.IMAGE_NAME }}-amd64.tar.gz
+            artifacts/image-arm64/${{ env.IMAGE_NAME }}-arm64.tar.gz
             paramSchema.json
-            emqx-5.8.10-offline.tar.gz
+            ${{ env.IMAGE_NAME }}-${{ needs.version.outputs.version }}-offline.tar.gz
