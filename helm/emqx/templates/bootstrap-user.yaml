@@ -1,0 +1,16 @@
+{{- if .Values.mqttAuth.username }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "emqx.fullname" . }}-bootstrap-user
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "emqx.name" . }}
+    helm.sh/chart: {{ include "emqx.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+type: Opaque
+stringData:
+  bootstrap_user.json: |
+    [{"user_id": {{ .Values.mqttAuth.username | quote }}, "password": {{ .Values.mqttAuth.password | quote }}, "is_superuser": true}]
+{{- end }}

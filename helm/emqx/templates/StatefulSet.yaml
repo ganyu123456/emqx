@@ -87,6 +87,16 @@ spec:
         secret:
           secretName: {{ .Values.emqxLicenseSecretName }}
       {{- end }}
+      {{- if .Values.mqttAuth.username }}
+      - name: bootstrap-user
+        secret:
+          secretName: {{ include "emqx.fullname" . }}-bootstrap-user
+      {{- end }}
+      {{- if .Values.mqttAuth.username }}
+      - name: authz-config
+        configMap:
+          name: {{ include "emqx.fullname" . }}-authz
+      {{- end }}
     {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 6 }}
     {{- end }}
@@ -167,6 +177,18 @@ spec:
           - name: emqx-license
             mountPath: "/opt/emqx/etc/emqx.lic"
             subPath: "emqx.lic"
+            readOnly: true
+          {{- end }}
+          {{- if .Values.mqttAuth.username }}
+          - name: bootstrap-user
+            mountPath: "/opt/emqx/etc/bootstrap_user.json"
+            subPath: "bootstrap_user.json"
+            readOnly: true
+          {{- end }}
+          {{- if .Values.mqttAuth.username }}
+          - name: authz-config
+            mountPath: "/opt/emqx/etc/authz.conf"
+            subPath: "authz.conf"
             readOnly: true
           {{- end }}
         {{- if .Values.extraVolumeMounts }}

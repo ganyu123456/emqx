@@ -17,9 +17,22 @@ dnsPolicy: ClusterFirstWithHostNet
 emqxConfig:
   EMQX_CLUSTER__DISCOVERY_STRATEGY: "dns"
   EMQX_DASHBOARD__DEFAULT_USERNAME: "admin"
-  EMQX_DASHBOARD__DEFAULT_PASSWORD: "public"
-  # MQTT TCP 端口从 1883 改为 11883
+  EMQX_DASHBOARD__DEFAULT_PASSWORD: "Luculent1!"
+  # MQTT TCP 监听器（TLS 后续按需再开）
   EMQX_LISTENERS__TCP__DEFAULT__BIND: "0.0.0.0:11883"
+  # 授权：无匹配规则时拒绝（堵住匿名访问）
+  EMQX_AUTHORIZATION__NO_MATCH: "deny"
+  # 授权源：文件规则，允许 sys 用户访问所有主题
+  EMQX_AUTHORIZATION__SOURCES__1__TYPE: "file"
+  EMQX_AUTHORIZATION__SOURCES__1__ENABLE: "true"
+  EMQX_AUTHORIZATION__SOURCES__1__PATH: "/opt/emqx/etc/authz.conf"
+  # 认证器：内置数据库 + 用户名密码
+  EMQX_AUTHENTICATION__1__MECHANISM: "password_based"
+  EMQX_AUTHENTICATION__1__BACKEND: "built_in_database"
+  EMQX_AUTHENTICATION__1__USER_ID_TYPE: "username"
+  # 首次启动（空库）自动导入 MQTT 用户，见下方 mqttAuth 段
+  EMQX_AUTHENTICATION__1__BOOTSTRAP_FILE: "/opt/emqx/etc/bootstrap_user.json"
+  EMQX_AUTHENTICATION__1__BOOTSTRAP_TYPE: "plain"
 
 ssl:
   enabled: false
@@ -30,6 +43,11 @@ ssl:
     kind: ""
   commonName: ""
   dnsnames: []
+
+# MQTT 认证用户（首次空库启动时通过 bootstrap_file 自动导入）
+mqttAuth:
+  username: "sys"
+  password: "Luculent1!"
 
 ingress:
   dashboard:

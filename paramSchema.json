@@ -80,7 +80,7 @@
         "key": "dashboardPassword",
         "label": "Dashboard 密码",
         "type": "password",
-        "defaultValue": "public",
+        "defaultValue": "Luculent1!",
         "yamlPath": "emqxConfig.EMQX_DASHBOARD__DEFAULT_PASSWORD",
         "description": "生产环境请务必修改默认密码",
         "span": 12
