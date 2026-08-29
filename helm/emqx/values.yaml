@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: 10.253.3.91:30550/library/emqx
   pullPolicy: IfNotPresent
-  tag: "0.6.2"
+  tag: "6.0.0"
 
 # Pod 直接使用宿主机网络栈
 hostNetwork: true

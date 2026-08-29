@@ -28,7 +28,7 @@
         "key": "imageTag",
         "label": "镜像版本",
         "type": "string",
-        "defaultValue": "0.6.2",
+        "defaultValue": "6.0.0",
         "yamlPath": "image.tag",
         "description": "指定镜像 Tag",
         "span": 12
