@@ -4,4 +4,4 @@ description: A Helm chart for EMQX
 icon: https://github.com/emqx.png
 name: emqx
 type: application
-version: 6.0.0
+version: 6.0.2

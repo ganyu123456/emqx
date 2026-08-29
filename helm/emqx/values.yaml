@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: 10.253.3.91:30550/library/emqx
   pullPolicy: IfNotPresent
-  tag: "6.0.0"
+  tag: "6.0.2"
 
 # Pod 直接使用宿主机网络栈
 hostNetwork: true
@@ -22,6 +22,10 @@ emqxConfig:
   EMQX_LISTENERS__TCP__DEFAULT__BIND: "0.0.0.0:11883"
   # 单条 MQTT 消息最大字节数（采集网关 history 消息单条可到 ~2.4MB，默认 1MB 会 reset 连接）
   EMQX_MQTT__MAX_PACKET_SIZE: "10MB"
+  # TCP socket 调优：默认 sndbuf/buffer 仅 4KB，大消息 + QoS1 下发送队列易堆积、触发 socket 超时断连
+  EMQX_LISTENERS__TCP__DEFAULT__TCP_OPTIONS__SNDBUF: "4194304"
+  EMQX_LISTENERS__TCP__DEFAULT__TCP_OPTIONS__RECBUF: "4194304"
+  EMQX_LISTENERS__TCP__DEFAULT__TCP_OPTIONS__BUFFER: "65536"
   # 授权：无匹配规则时拒绝（堵住匿名访问）
   EMQX_AUTHORIZATION__NO_MATCH: "deny"
   # 授权源：文件规则，允许 sys 用户访问所有主题
