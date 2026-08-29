@@ -28,7 +28,7 @@
         "key": "imageTag",
         "label": "镜像版本",
         "type": "string",
-        "defaultValue": "5.8.8",
+        "defaultValue": "0.6.2",
         "yamlPath": "image.tag",
         "description": "指定镜像 Tag",
         "span": 12
@@ -86,6 +86,15 @@
         "span": 12
       },
       {
+        "key": "maxPacketSize",
+        "label": "MQTT 最大消息包",
+        "type": "string",
+        "defaultValue": "10MB",
+        "yamlPath": "emqxConfig.EMQX_MQTT__MAX_PACKET_SIZE",
+        "description": "单条 MQTT 消息最大字节数，采集网关 history 消息单条可达 ~2.4MB，默认 1MB 会 reset 连接",
+        "span": 12
+      },
+      {
         "key": "podManagementPolicy",
         "label": "Pod 部署策略",
         "type": "select",
@@ -113,6 +122,29 @@
         "defaultValue": "1Gi",
         "yamlPath": "persistence.size",
         "description": "仅在持久化开启时生效",
+        "span": 12
+      },
+      {
+        "key": "persistenceStorageClass",
+        "label": "存储类",
+        "type": "string",
+        "defaultValue": "",
+        "yamlPath": "persistence.storageClassName",
+        "description": "PVC 的 StorageClass 名称，留空使用集群默认存储类，仅在持久化开启时生效",
+        "span": 12
+      },
+      {
+        "key": "persistenceAccessMode",
+        "label": "访问模式",
+        "type": "select",
+        "defaultValue": "ReadWriteOnce",
+        "yamlPath": "persistence.accessMode",
+        "options": [
+          { "label": "ReadWriteOnce - 单节点读写", "value": "ReadWriteOnce" },
+          { "label": "ReadWriteMany - 多节点读写", "value": "ReadWriteMany" },
+          { "label": "ReadOnlyMany - 多节点只读", "value": "ReadOnlyMany" }
+        ],
+        "description": "PVC 访问模式，仅在持久化开启时生效",
         "span": 12
       }
     ]
