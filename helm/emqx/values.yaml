@@ -20,6 +20,8 @@ emqxConfig:
   EMQX_DASHBOARD__DEFAULT_PASSWORD: "Luculent1!"
   # MQTT TCP 监听器（TLS 后续按需再开）
   EMQX_LISTENERS__TCP__DEFAULT__BIND: "0.0.0.0:11883"
+  # 单条 MQTT 消息最大字节数（采集网关 history 消息单条可到 ~2.4MB，默认 1MB 会 reset 连接）
+  EMQX_MQTT__MAX_PACKET_SIZE: "10MB"
   # 授权：无匹配规则时拒绝（堵住匿名访问）
   EMQX_AUTHORIZATION__NO_MATCH: "deny"
   # 授权源：文件规则，允许 sys 用户访问所有主题
@@ -98,7 +100,7 @@ service:
   labels: {}
 
 persistence:
-  enabled: true
+  enabled: false
   size: 1Gi
   storageClassName: ""
   accessMode: ReadWriteOnce
